@@ -143,6 +143,13 @@ class AppSettings(object):
         return self._setting("SIGNUP_FORM_CLASS", None)
 
     @property
+    def LOGIN_FORM_CLASS(self):
+        """
+        Signup form
+        """
+        return self._setting("LOGIN_FORM_CLASS", None)
+
+    @property
     def USERNAME_REQUIRED(self):
         """
         The user is required to enter a username when signing up

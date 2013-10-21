@@ -18,7 +18,7 @@ from .utils import (get_next_redirect_url, complete_signup,
                     get_login_redirect_url,
                     passthrough_next_redirect_url)
 from .forms import AddEmailForm, ChangePasswordForm
-from .forms import LoginForm, ResetPasswordKeyForm
+from .forms import get_login_form, ResetPasswordKeyForm
 from .forms import ResetPasswordForm, SetPasswordForm, SignupForm
 from .utils import sync_user_email_addresses
 from .models import EmailAddress, EmailConfirmation
@@ -50,7 +50,7 @@ class RedirectAuthenticatedUserMixin(object):
 
 
 class LoginView(RedirectAuthenticatedUserMixin, FormView):
-    form_class = LoginForm
+    form_class = get_login_form()
     template_name = "account/login.html"
     success_url = None
     redirect_field_name = "next"

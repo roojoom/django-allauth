@@ -146,12 +146,19 @@ class _DummyCustomSignupForm(forms.Form):
 def _base_signup_form_class():
     if not app_settings.SIGNUP_FORM_CLASS:
         return _DummyCustomSignupForm
+    fc_class = _load_form_class(app_settings.SIGNUP_FORM_CLASS)
+    if not hasattr(fc_class, 'save'):
+        raise exceptions.ImproperlyConfigured('The custom signup form must'
+                                                  ' implement a "save" method')
+    return fc_class
+
+def _load_form_class(form_class):
     try:
-        fc_module, fc_classname = app_settings.SIGNUP_FORM_CLASS.rsplit('.', 1)
+        fc_module, fc_classname = form_class.rsplit('.', 1)
     except ValueError:
         raise exceptions.ImproperlyConfigured('%s does not point to a form'
                                               ' class'
-                                              % app_settings.SIGNUP_FORM_CLASS)
+                                              % form_class)
     try:
         mod = import_module(fc_module)
     except ImportError as e:
@@ -163,11 +170,12 @@ def _base_signup_form_class():
         raise exceptions.ImproperlyConfigured('Module "%s" does not define a'
                                               ' "%s" class' % (fc_module,
                                                                fc_classname))
-    if not hasattr(fc_class, 'save'):
-        raise exceptions.ImproperlyConfigured('The custom signup form must'
-                                              ' implement a "save" method')
     return fc_class
 
+def get_login_form():
+    if not app_settings.LOGIN_FORM_CLASS:
+        return LoginForm
+    return _load_form_class(app_settings.LOGIN_FORM_CLASS)
 
 class BaseSignupForm(_base_signup_form_class()):
     username = forms.CharField(label=_("Username"),
