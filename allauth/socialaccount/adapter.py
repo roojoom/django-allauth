@@ -4,12 +4,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 
-from ..utils import (import_attribute,
+from ..utils import (import_attribute,email_address_exists,
                      valid_email_or_none)
 from ..account.utils import user_email, user_username, user_field
 from ..account.models import EmailAddress
 from ..account.adapter import get_adapter as get_account_adapter
 from ..account.app_settings import EmailVerificationMethod
+from ..account import app_settings as account_settings
 
 from . import app_settings
 
@@ -116,6 +117,29 @@ class DefaultSocialAccountAdapter(object):
         regular flow by raising an ImmediateHttpResponse
         """
         return get_account_adapter().is_open_for_signup(request)
+    
+    def is_auto_signup_possible(self,request,sociallogin,user):
+        auto_signup = True
+        email = user_email(sociallogin.account.user)
+        if email:
+            if account_settings.UNIQUE_EMAIL:
+                if email_address_exists(email):
+                    # Oops, another user already has this address.  We
+                    # cannot simply connect this social account to the
+                    # existing user. Reason is that the email adress may
+                    # not be verified, meaning, the user may be a hacker
+                    # that has added your email address to his account in
+                    # the hope that you fall in his trap.  We cannot check
+                    # on 'email_address.verified' either, because
+                    # 'email_address' is not guaranteed to be verified.
+                    auto_signup = False
+                    # FIXME: We redirect to signup form -- user will
+                    # see email address conflict only after posting
+                    # whereas we detected it here already.
+        elif app_settings.EMAIL_REQUIRED:
+            # Nope, email is required and we don't have it yet...
+            auto_signup = False
+        return auto_signup
 
 
 def get_adapter():
