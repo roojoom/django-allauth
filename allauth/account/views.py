@@ -49,22 +49,25 @@ class RedirectAuthenticatedUserMixin(object):
                                       redirect_field_name=redirect_field_name)
 
 
-class LoginView(RedirectAuthenticatedUserMixin, FormView):
-    form_class = get_login_form()
-    template_name = "account/login.html"
-    success_url = None
+class RedirectToNextOnFormCompletionMixin(object):
+    
     redirect_field_name = "next"
-
-    def form_valid(self, form):
-        success_url = self.get_success_url()
-        return form.login(self.request, redirect_url=success_url)
-
+    
     def get_success_url(self):
         # Explicitly passed ?next= URL takes precedence
         ret = (get_next_redirect_url(self.request,
                                      self.redirect_field_name)
                or self.success_url)
         return ret
+    
+class LoginView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMixin, FormView):
+    form_class = get_login_form()
+    template_name = "account/login.html"
+    success_url = None
+
+    def form_valid(self, form):
+        success_url = self.get_success_url()
+        return form.login(self.request, redirect_url=success_url)
 
     def get_context_data(self, **kwargs):
         ret = super(LoginView, self).get_context_data(**kwargs)
@@ -109,19 +112,11 @@ class CloseableSignupMixin(object):
         return self.response_class(**response_kwargs)
 
 
-class SignupView(RedirectAuthenticatedUserMixin, CloseableSignupMixin,
+class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMixin, CloseableSignupMixin,
                  FormView):
     template_name = "account/signup.html"
     form_class = SignupForm
-    redirect_field_name = "next"
     success_url = None
-
-    def get_success_url(self):
-        # Explicitly passed ?next= URL takes precedence
-        ret = (get_next_redirect_url(self.request,
-                                     self.redirect_field_name)
-               or self.success_url)
-        return ret
 
     def form_valid(self, form):
         user = form.save(self.request)
@@ -341,7 +336,7 @@ class EmailView(FormView):
 email = login_required(EmailView.as_view())
 
 
-class PasswordChangeView(FormView):
+class PasswordChangeView(RedirectToNextOnFormCompletionMixin,FormView):
     template_name = "account/password_change.html"
     form_class = ChangePasswordForm
     success_url = reverse_lazy("account_change_password")
@@ -377,7 +372,7 @@ class PasswordChangeView(FormView):
 password_change = login_required(PasswordChangeView.as_view())
 
 
-class PasswordSetView(FormView):
+class PasswordSetView(RedirectToNextOnFormCompletionMixin,FormView):
     template_name = "account/password_set.html"
     form_class = SetPasswordForm
     success_url = reverse_lazy("account_set_password")
