@@ -144,6 +144,17 @@ signup = SignupView.as_view()
 
 class ConfirmEmailView(TemplateResponseMixin, View):
 
+    def dispatch(self, request, *args, **kwargs):
+        if app_settings.EMAIL_CONFIRMATION_IMMEDIATE_REDIRECT:
+            self.object = confirmation = self.get_object()
+            confirmation.confirm(self.request)
+            get_adapter().add_message(self.request,
+                          messages.SUCCESS,
+                          'account/messages/email_confirmed.txt',
+                          {'email': confirmation.email_address.email})
+            return redirect( self.get_redirect_url())
+        return super(ConfirmEmailView,self).dispatch(request, *args, **kwargs)
+    
     def get_template_names(self):
         if self.request.method == 'POST':
             return ["account/email_confirmed.html"]

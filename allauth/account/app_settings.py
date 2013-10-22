@@ -70,6 +70,15 @@ class AppSettings(object):
                              settings.LOGIN_URL)
 
     @property
+    def EMAIL_CONFIRMATION_IMMEDIATE_REDIRECT(self):
+        """
+        Should we immediately redirect upon accessing the confirmation email
+        or should a new page appear that requires a button to be pressed
+        """
+        return self._setting("EMAIL_CONFIRMATION_IMMEDIATE_REDIRECT",
+                             None)
+        
+    @property
     def EMAIL_REQUIRED(self):
         """
         The user is required to hand over an e-mail address when signing up
