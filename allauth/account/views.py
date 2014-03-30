@@ -133,7 +133,7 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
         hostlist = ['localhost', '127.0.0.1', 'roojoom.com']
         if any(host in refparsed.netloc for host in hostlist):
             if not refparsed.path.startswith('/accounts/'):
-                print refparsed.path
+                #  print refparsed.path
                 self.request.session['ref'] = referer
 
         form = kwargs['form']
