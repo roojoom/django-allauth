@@ -1,3 +1,5 @@
+import urlparse
+
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect, Http404
@@ -125,6 +127,15 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                                self.get_success_url())
 
     def get_context_data(self, **kwargs):
+
+        referer = self.request.META['HTTP_REFERER']
+        refparsed = urlparse.urlparse(referer)
+        hostlist = ['localhost', '127.0.0.1', 'roojoom.com']
+        if any(host in refparsed.netloc for host in hostlist):
+            if not refparsed.path.startswith('/accounts/'):
+                print refparsed.path
+                self.request.session['ref'] = referer
+
         form = kwargs['form']
         form.fields["email"].initial = self.request.session \
             .get('account_verified_email', None)
