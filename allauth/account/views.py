@@ -128,7 +128,7 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
 
     def get_context_data(self, **kwargs):
 
-        referer = self.request.META['HTTP_REFERER']
+        referer = self.request.META.get('HTTP_REFERER','unknown')
         refparsed = urlparse.urlparse(referer)
         hostlist = ['localhost', '127.0.0.1', 'roojoom.com']
         if any(host in refparsed.netloc for host in hostlist):
