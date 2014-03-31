@@ -136,6 +136,12 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                 #  print refparsed.path
                 self.request.session['ref'] = referer
 
+        analytics_meta_data = request.GET.get('analytics').split(':')
+        self.request.session['source'] = analytics_meta_data[0]
+        self.request.session['action'] = analytics_meta_data[1]
+        self.request.session['location'] = analytics_meta_data[2]
+
+
         form = kwargs['form']
         form.fields["email"].initial = self.request.session \
             .get('account_verified_email', None)
