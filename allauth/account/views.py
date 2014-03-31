@@ -136,10 +136,12 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                 #  print refparsed.path
                 self.request.session['ref'] = referer
 
-        analytics_meta_data = self.request.GET.get('analytic').split(':') or ["", "", ""]
-        self.request.session['source'] = analytics_meta_data[0]
-        self.request.session['action'] = analytics_meta_data[1]
-        self.request.session['location'] = analytics_meta_data[2]
+        analytics_meta_data = self.request.GET.get('analytic')
+        if analytics_meta_data:
+            analytics_meta_data = analytics_meta_data.split(':')
+            self.request.session['source'] = analytics_meta_data[0]
+            self.request.session['action'] = analytics_meta_data[1]
+            self.request.session['location'] = analytics_meta_data[2]
 
 
         form = kwargs['form']
