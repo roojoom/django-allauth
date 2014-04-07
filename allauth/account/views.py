@@ -29,6 +29,7 @@ from . import signals
 from . import app_settings
 
 from .adapter import get_adapter
+from users_social import Type
 
 User = get_user_model()
 
@@ -133,7 +134,6 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
         hostlist = ['localhost', '127.0.0.1', 'roojoom.com']
         if any(host in refparsed.netloc for host in hostlist):
             if not refparsed.path.startswith('/accounts/'):
-                #  print refparsed.path
                 self.request.session['ref'] = referer
 
         analytics_meta_data = self.request.GET.get('analytic')
@@ -153,9 +153,13 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                                                   self.redirect_field_name)
         redirect_field_name = self.redirect_field_name
         redirect_field_value = self.request.REQUEST.get(redirect_field_name)
-        ret.update({"login_url": login_url,
-                    "redirect_field_name": redirect_field_name,
-                    "redirect_field_value": redirect_field_value})
+        user_types = Type.objects.all()
+        ret.update({
+                   "user_types": user_types,
+                   "login_url": login_url,
+                   "redirect_field_name": redirect_field_name,
+                   "redirect_field_value": redirect_field_value,
+                   })
         return ret
 
 signup = SignupView.as_view()
