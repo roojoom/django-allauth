@@ -29,7 +29,7 @@ from . import signals
 from . import app_settings
 
 from .adapter import get_adapter
-from users_social import Type
+from users_social.models import Type
 
 User = get_user_model()
 
