@@ -31,6 +31,7 @@ from . import app_settings
 
 from .adapter import get_adapter
 from users_social.models import Type
+from mixpanel.tasks import EventTracker, PeopleTracker
 
 User = get_user_model()
 
