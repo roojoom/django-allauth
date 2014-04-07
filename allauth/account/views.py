@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import redirect
+from django.conf import settings
 
 from ..exceptions import ImmediateHttpResponse
 from ..utils import get_user_model
