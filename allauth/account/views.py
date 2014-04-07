@@ -150,8 +150,8 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
             result = EventTracker.delay(
                 settings.EVENT_SIGNUP_FORM_DISPLAYED,
                 {
-                    'distinct_id': str(user.uuid),
-                    'ref': request.session.get('ref', ''),
+                    'distinct_id': str(self.request.user.uuid),
+                    'ref': self.request.session.get('ref', ''),
                 },
                 token=settings.MIXPANEL_API_TOKEN,
                 ip=0,
