@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import redirect
+from django.conf import settings
 
 from ..exceptions import ImmediateHttpResponse
 from ..utils import get_user_model
@@ -29,6 +30,8 @@ from . import signals
 from . import app_settings
 
 from .adapter import get_adapter
+from users_social.models import Type
+from mixpanel.tasks import EventTracker, PeopleTracker
 
 User = get_user_model()
 
@@ -133,7 +136,6 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
         hostlist = ['localhost', '127.0.0.1', 'roojoom.com']
         if any(host in refparsed.netloc for host in hostlist):
             if not refparsed.path.startswith('/accounts/'):
-                #  print refparsed.path
                 self.request.session['ref'] = referer
 
         analytics_meta_data = self.request.GET.get('analytic')
@@ -143,6 +145,17 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
             self.request.session['action'] = analytics_meta_data[1]
             self.request.session['location'] = analytics_meta_data[2]
 
+        if settings.IS_MAX_PANEL_ACTIVE:
+            if hasattr(settings, 'EVENT_SIGNUP_FORM_DISPLAYED'):
+                result = EventTracker.delay(
+                    settings.EVENT_SIGNUP_FORM_DISPLAYED,
+                    {
+                        'distinct_id': str(self.request.session.get('uuid', '')),
+                        'ref': str(self.request.session.get('ref', '')),
+                    },
+                    token=settings.MIXPANEL_API_TOKEN,
+                    ip=0,
+                )
 
         form = kwargs['form']
         form.fields["email"].initial = self.request.session \
@@ -153,9 +166,13 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                                                   self.redirect_field_name)
         redirect_field_name = self.redirect_field_name
         redirect_field_value = self.request.REQUEST.get(redirect_field_name)
-        ret.update({"login_url": login_url,
-                    "redirect_field_name": redirect_field_name,
-                    "redirect_field_value": redirect_field_value})
+        user_types = Type.objects.all()
+        ret.update({
+                   "user_types": user_types,
+                   "login_url": login_url,
+                   "redirect_field_name": redirect_field_name,
+                   "redirect_field_value": redirect_field_value,
+                   })
         return ret
 
 signup = SignupView.as_view()
