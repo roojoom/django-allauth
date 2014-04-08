@@ -157,6 +157,17 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                     ip=0,
                 )
 
+        if settings.IS_MAX_PANEL_ACTIVE:
+            result = EventTracker.delay(
+                settings.EVENT_SIGNUP_FORM_DISPLAYED,
+                {
+                    'distinct_id': str(self.request.session.get('uuid', '')),
+                    'ref': str(self.request.session.get('ref', '')),
+                },
+                token=settings.MIXPANEL_API_TOKEN,
+                ip=0,
+            )
+
         form = kwargs['form']
         form.fields["email"].initial = self.request.session \
             .get('account_verified_email', None)
