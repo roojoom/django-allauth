@@ -139,7 +139,7 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                 self.request.session['ref'] = referer
 
         analytics_meta_data = self.request.GET.get('analytic')
-        if analytics_meta_data:
+        if analytics_meta_data and self.request.user.is_authenticated:
             analytics_meta_data = analytics_meta_data.split(':')
             self.request.session['source'] = analytics_meta_data[0]
             self.request.session['action'] = analytics_meta_data[1]
@@ -178,7 +178,7 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
                                                   self.redirect_field_name)
         redirect_field_name = self.redirect_field_name
         redirect_field_value = self.request.REQUEST.get(redirect_field_name)
-        user_types = Type.objects.all()
+        user_types = UserType.objects.all()
         ret.update({
                    "user_types": user_types,
                    "login_url": login_url,
