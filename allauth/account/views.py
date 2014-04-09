@@ -138,13 +138,13 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
             if not refparsed.path.startswith('/accounts/'):
                 self.request.session['ref'] = referer
 
-        analytics_meta_data = self.request.GET.get('analytic')
-        analytics_meta_data.split(':')
+        if self.request.GET.get('analytic'):
+            analytics_meta_data = self.request.GET.get('analytic').split(':')
 
-        if len(analytics_meta_data) and self.request.user.is_authenticated:
-            self.request.session['source'] = analytics_meta_data[0]
-            self.request.session['action'] = analytics_meta_data[1]
-            self.request.session['location'] = analytics_meta_data[2]
+            if len(analytics_meta_data) == 3:
+                self.request.session['source'] = analytics_meta_data[0]
+                self.request.session['action'] = analytics_meta_data[1]
+                self.request.session['location'] = analytics_meta_data[2]
 
         if settings.IS_MAX_PANEL_ACTIVE:
             if hasattr(settings, 'EVENT_SIGNUP_FORM_DISPLAYED'):
