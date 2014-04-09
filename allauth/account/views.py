@@ -138,10 +138,10 @@ class SignupView(RedirectToNextOnFormCompletionMixin,RedirectAuthenticatedUserMi
             if not refparsed.path.startswith('/accounts/'):
                 self.request.session['ref'] = referer
 
-        if self.request.user.is_authenticated:
-            analytics_meta_data = self.request.GET.get('analytic').split(':')
+        analytics_meta_data = self.request.GET.get('analytic')
+        analytics_meta_data.split(':')
 
-        if len(analytics_meta_data) == 3 and self.request.user.is_authenticated:
+        if len(analytics_meta_data) and self.request.user.is_authenticated:
             self.request.session['source'] = analytics_meta_data[0]
             self.request.session['action'] = analytics_meta_data[1]
             self.request.session['location'] = analytics_meta_data[2]
