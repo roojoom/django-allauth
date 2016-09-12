@@ -107,7 +107,7 @@ METADATA = dict(
     author='Raymond Penners',
     author_email='raymond.penners@intenct.nl',
     description='Integrated set of Django applications addressing authentication, registration, account management as well as 3rd party (social) account authentication.',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     url='http://github.com/pennersr/django-allauth',
     keywords='django auth account social openid twitter facebook oauth registration',
     install_requires=['Django >= 1.4.3',
